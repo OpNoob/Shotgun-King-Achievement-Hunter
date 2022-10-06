@@ -1,0 +1,59 @@
+Swarm
+Win with Pillage, Revolution and Conscription
+
+Legion
+Win with Militia, Assault and Pikemen
+
+Sniper
+Win with High Focus, Crow's Blessing and Engraved Scope
+
+Assassin
+Win with Ritual Dagger, Taunting Hop and Subtle Poison
+
+Steroids
+Win with Sacred Crown, Majestic Censer and Courteous Jousting
+
+Trigger Happy
+Win with Ermine Belt, Kingdom Wealth and Unjust Decree
+
+Scavenger
+Win with Ammunition Depot, Elite Gem and Small Fry Harvest
+
+Harem
+Win with Iron Maiden, Genderqueer and King's Mistress
+
+Social Distancing
+Win with The Moat, Wand of Gust and August Presence
+
+Religion
+Win with Conclave, Cardinal and Theocracy
+
+Secret
+Win with Genderqueer, Saboteur and The Secret Heir
+
+Security Service
+Win with Castle, Kite Shield and Bodyguard
+
+Inquisition
+Win with Zealots, Ascension and The Red Book
+
+Mobility
+Win with Royal Loafers, Wand of Wings and Unfaithful Steed
+
+Boundaries
+Win with Two Rightful Curtsies and The Moat
+
+Machine Gun
+Win with Three Extra Barrels
+
+Survivor
+Win with Majestic Censer, Black Mist and Cornered Despot
+
+Wizard
+Have 4 Magic Wands
+
+Avenged
+Kill The Black Bishop
+
+Exorcised
+Kill The Red Book
