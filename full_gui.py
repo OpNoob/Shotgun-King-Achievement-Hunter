@@ -70,6 +70,12 @@ def main():
     RESET_K = "-reset-"
     ALWAYS_RUN_K = "-always run-"
     RUN_ACTIVE_ONLY_K = "-run active only-"
+    ACHIEVEMENTS_K = "-completed achievement ?"
+    SAVE_ACHIEVEMENTS_K = "-save achievements-"
+    TOGGLE_ON_ACHIE_K = "-toggle achie on-"
+    TOGGLE_OFF_ACHIE_K = "toggle achie off-"
+    ACHIEVEMENTS_EXTRA_FRAME_K = "-extra achievements frame-"
+    SHOW_ACHIEVEMENTS_EXTRA_K = "-show extra achievements-"
 
     # GUI options
     TEXT_SIZE = (max_string_length, 1)
@@ -162,7 +168,7 @@ def main():
                 section[i] = None
 
     def chooseCardsEvent(evnt, current_data):
-        print(event)
+        # print(event)
         # Getting current card from tooltip (assumes it is always there)
         if not hasattr(window[evnt], 'TooltipObject'):
             return False
@@ -293,7 +299,20 @@ def main():
         updateImages(IMAGE_BUFFS_K, card_found_buffs)
         updateImages(IMAGE_NERFS_K, card_found_nerfs)
 
+
+    def getAchievements():
+        achievements_completed_temp = list()
+        for index, achievements_name in enumerate(achievement_combos):
+            completed = values[getKeyFromIndex(ACHIEVEMENTS_K, index)]
+            if completed:
+                achievements_completed_temp.append(achievements_name)
+        return achievements_completed_temp
+
     def getCurrentData():
+        # First update achievement cards
+        achievements_completed_temp = getAchievements()
+        game.updateCompletedNames(achievements_completed_temp)
+
         resolution_type = values[RES_TYPE_K]
         if resolution_type == "Default":
             resolution_type = None
@@ -323,9 +342,73 @@ def main():
 
         window.enable()
 
+    def getAchievementElements(image_sizes=(3, 3)):
+        return_elements = list()
+        for index, (achievement_name, cards) in enumerate(achievement_combos.items()):
+            cards_str = ""
+            for c in cards:
+                cards_str += c
+                if c != cards[-1]:
+                    cards_str += ", "
+
+            if achievement_name in achievements_completed:
+                completed = True
+            else:
+                completed = False
+
+            elem_to_add = [
+                sg.Image(data=resize_image(files_achievements[achievement_name], resize=(25, 25)), tooltip=str(achievement_name)),
+                # sg.Checkbox(achievement_name, tooltip=cards_str, default=completed, key=getKeyFromIndex(ACHIEVEMENTS_K, index)),
+            ]
+            for card_name in cards:
+                elem_to_add.append(
+                    sg.Image(data=resize_image(files[card_name], resize=(29, 21)), tooltip=str(card_name))
+                )
+
+            elem_to_add.append(
+                sg.Checkbox(achievement_name, tooltip=cards_str, default=completed,
+                            key=getKeyFromIndex(ACHIEVEMENTS_K, index)),
+            )
+
+            return_elements.append(elem_to_add)
+
+        return return_elements
+
+    def getAchievementElementsExtra():
+        return_elements = list()
+        for achievement_name, description in skipped_achievements.items():
+            return_elements.append(
+                [
+                    sg.Image(data=resize_image(files_achievements[achievement_name], resize=(32, 32)),
+                             tooltip=str(achievement_name)),
+                    sg.T("x", pad=((9, 0),(0, 0))), sg.Text(achievement_name, tooltip=f"Not implemented yet. Description: {description}"),
+                ]
+            )
+        return return_elements
+
+    # def handleAchievements(evnt):
+    #     partitions = ACHIEVEMENTS_K.partition("?")
+    #     print(evnt, partitions)
+    #     if partitions[0] in evnt and partitions[2] in evnt:
+    #         index_str = event.replace(partitions[0], "").replace(partitions[2], "")
+    #         index = int(index_str)
+    #
+    #         completed = values[evnt]
+    #
+    #         game.updateCompleted(achievement_combos[index], completed)
+    #
+    #         print(game.achievement_cards)
+    #         return True
+    #     return False
+
+
     layout = [
         [
             sg.vtop([
+                sg.Column([
+                    [sg.Frame("Achievements", getAchievementElements())],
+                    [sg.Frame("Non-implemented Achievements", getAchievementElementsExtra(), key=ACHIEVEMENTS_EXTRA_FRAME_K, visible=False)],
+                ]),
                 sg.Column([
                     [
                         sg.Push(),
@@ -394,10 +477,26 @@ def main():
                         sg.Combo(["1080p", "Default"], default_value="Default", key=RES_TYPE_K, readonly=True),
                     ],
                     [
-                        sg.Checkbox("Continuous Running", False, key=ALWAYS_RUN_K, expand_x=True, change_submits=True, tooltip="Note that this will need constant vision of window"),
+                        sg.Checkbox("Continuous Running", False, key=ALWAYS_RUN_K, expand_x=True, change_submits=True,
+                                    tooltip="Note that this will need constant vision of window"),
                     ],
                     [
-                        sg.Checkbox("Run When Window Active Only", False, key=RUN_ACTIVE_ONLY_K, expand_x=True, change_submits=True, tooltip="Note this will disable any data extraction from game while window is not visible"),
+                        sg.Checkbox("Run When Window Active Only", False, key=RUN_ACTIVE_ONLY_K, expand_x=True,
+                                    change_submits=True,
+                                    tooltip="Note this will disable any data extraction from game while window is not visible"),
+                    ],
+                    [
+                        sg.Button("Save achievements", expand_x=True, key=SAVE_ACHIEVEMENTS_K, tooltip="Warning, this will overwrite the old achievementens list"),
+                    ],
+                    [
+                        sg.Button("Toggle achievements complete ON", expand_x=True, key=TOGGLE_ON_ACHIE_K,),
+                    ],
+                    [
+                        sg.Button("Toggle achievements complete OFF", expand_x=True, key=TOGGLE_OFF_ACHIE_K, ),
+                    ],
+                    [
+                        sg.Checkbox("Show non-implemented achievements", False, key=SHOW_ACHIEVEMENTS_EXTRA_K, expand_x=True, change_submits=True,
+                                    tooltip="Note that this will use extra space from the window.  This is cannot be reversed until full window reset"),
                     ],
                 ]), ])
         ],
@@ -417,7 +516,11 @@ def main():
             break
 
         elif event == "__TIMEOUT__":
-            pass
+            if time.time() - always_run_last_time > 5:
+                if not (RUN_ACTIVE_ONLY and GetWindowText(GetForegroundWindow()) != window_text):
+                    if ALWAYS_RUN and ccw.checkChoiceWindow():
+                        getCurrentData()
+                    always_run_last_time = time.time()
 
         elif event == "Run":
             getCurrentData()
@@ -440,17 +543,32 @@ def main():
         elif event == RESET_K:
             reset = True
             break
+
+        elif event == SAVE_ACHIEVEMENTS_K:
+            achievements_completed_temp = getAchievements()
+            with open(ACHIEVEMENTS_COMPLETED_PATH, "w") as f:
+                achievements_completed_temp = [achievements_completed_temp[i] + "\n" if i < len(achievements_completed_temp) - 1 else achievements_completed_temp[i] for i in range(len(achievements_completed_temp))]
+                f.writelines(achievements_completed_temp)
+
+        elif event == TOGGLE_ON_ACHIE_K:
+            for index, achievements_name in enumerate(achievement_combos):
+                window[getKeyFromIndex(ACHIEVEMENTS_K, index)].update(True)
+
+        elif event == TOGGLE_OFF_ACHIE_K:
+            for index, achievements_name in enumerate(achievement_combos):
+                window[getKeyFromIndex(ACHIEVEMENTS_K, index)].update(False)
+
+        elif event == SHOW_ACHIEVEMENTS_EXTRA_K:
+            if values[SHOW_ACHIEVEMENTS_EXTRA_K]:
+                window[ACHIEVEMENTS_EXTRA_FRAME_K].update(visible=True)
+            else:
+                window[ACHIEVEMENTS_EXTRA_FRAME_K].update(visible=False)
+
         # Positive cards (Buffs) - Choice
         elif chooseCardsEvent(event, CURRENT_DATA):
             pass
 
-        if time.time() - always_run_last_time > 5:
-            if not (RUN_ACTIVE_ONLY and GetWindowText(GetForegroundWindow()) != window_text):
-                if ALWAYS_RUN and ccw.checkChoiceWindow():
-                    getCurrentData()
-                always_run_last_time = time.time()
-
-        print(CURRENT_DATA)
+        # print(CURRENT_DATA)
 
     window.Close()
 

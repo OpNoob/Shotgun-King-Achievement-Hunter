@@ -5,15 +5,36 @@ import json
 import pickle
 import os
 
-achievement_combos = achievements.win_combo_achievements
+achievement_combos = dict(sorted(achievements.win_combo_achievements.items()))
 card_names = achievements.card_names
+skipped_achievements = achievements.skipped_achievements
+achievements_completed = achievements.getCompleted()
+ACHIEVEMENTS_COMPLETED_PATH = achievements.ACHIEVEMENTS_COMPLETED_PATH
 
 
 class GameData:
     def __init__(self):
         self.current_cards = list()
+        self.achievements_completed = achievements_completed
 
-        self.achievement_cards = copy.deepcopy(achievement_combos)
+        self.achievement_cards_original = copy.deepcopy(achievement_combos)
+
+        self.achievement_cards = copy.deepcopy(self.achievement_cards_original)
+        achievements.filterAchievementsDone(self.achievement_cards, achievements_completed)
+
+    def updateCompleted(self, achievement_name: str, completed: bool):
+        if completed:
+            self.achievements_completed.append(achievement_name)
+        else:
+            self.achievements_completed.remove(achievement_name)
+
+        # Update achievement_cards
+        self.achievement_cards = copy.deepcopy(self.achievement_cards_original)
+        achievements.filterAchievementsDone(self.achievement_cards, achievements_completed)
+
+    def updateCompletedNames(self, achievement_names: list[str]):
+        self.achievement_cards = copy.deepcopy(self.achievement_cards_original)
+        achievements.filterAchievementsDone(self.achievement_cards, achievement_names)
 
     def addCards(self, card_pos, card_neg):
         self.current_cards.append(card_pos)

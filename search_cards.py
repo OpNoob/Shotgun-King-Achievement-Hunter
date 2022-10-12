@@ -13,16 +13,32 @@ https://stackoverflow.com/questions/35097837/capture-video-data-from-screen-in-p
 """
 
 game = estimate.GameData()
+skipped_achievements = estimate.skipped_achievements
+achievement_combos = estimate.achievement_combos
+achievements_completed = estimate.achievements_completed
+ACHIEVEMENTS_COMPLETED_PATH = estimate.ACHIEVEMENTS_COMPLETED_PATH
 
 data_dir_pos = 'Game Data/Positive'
 data_dir_neg = 'Game Data/Negative'
-files_pos = {f.replace(".png", "").replace("_", " ").replace("%", "'"): os.path.join(data_dir_pos, f) for f in
+data_dir_ach = 'Game Data/Achievements'
+files_pos = {f.replace(".png", "").replace("_", " ").replace("%27", "'"): os.path.join(data_dir_pos, f) for f in
              os.listdir(data_dir_pos) if f.endswith(".png")}
-files_neg = {f.replace(".png", "").replace("_", " ").replace("%", "'"): os.path.join(data_dir_neg, f) for f in
+files_neg = {f.replace(".png", "").replace("_", " ").replace("%27", "'"): os.path.join(data_dir_neg, f) for f in
              os.listdir(data_dir_neg) if f.endswith(".png")}
+if "Crossdresser" in files_neg:
+    dat = files_neg["Crossdresser"]
+    files_neg["Genderqueer"] = dat
+    del files_neg["Crossdresser"]
+
 files = {**files_pos, **files_neg, None: "Game Data/Empty.png"}
 cards_pos = list(files_pos.keys())
 cards_neg = list(files_neg.keys())
+
+# Achievements images
+files_achievements = {f.replace(".png", "").replace("_", " ").replace("%27", "'"): os.path.join(data_dir_ach, f) for f in
+             os.listdir(data_dir_ach) if f.endswith(".png")}
+
+# print(files)
 
 # Getting opencv images
 file_data = dict()
