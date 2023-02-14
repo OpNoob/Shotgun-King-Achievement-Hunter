@@ -1,6 +1,9 @@
 # Shotgun-King-Achievement-Hunter
 A simple assistant to get most achievements in the game Shotgun King
 
+## Note
+With the updates to the game, this is no longer up to date.  Feel free to fork this repository. 
+
 ## How it works
 This program uses computer vision to try to extract the cards owned.  For there it is a matter of a simple algorithm to decide which cards are best for choosing.
 
